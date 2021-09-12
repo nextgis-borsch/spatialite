@@ -1,0 +1,21 @@
+diff --git a/src/spatialite_xml_print/spatialite_xml_print.c b/src/spatialite_xml_print/spatialite_xml_print.c
+index e14bfd5..da5711e 100644
+--- a/src/spatialite_xml_print/spatialite_xml_print.c
++++ b/src/spatialite_xml_print/spatialite_xml_print.c
+@@ -33,7 +33,16 @@ Regione Toscana - Settore Sistema Informativo Territoriale ed Ambientale
+ 
+ */
+ 
++#if defined(_WIN32) && !defined(__MINGW32__)
++#include <Winsock2.h>
++#else
+ #include <sys/time.h>
++#endif
++
++#if defined(_WIN32) && !defined(__MINGW32__)
++#define strcasecmp _stricmp
++#define strncasecmp _strnicmp
++#endif
+ 
+ #if defined(_WIN32) && !defined(__MINGW32__)
+ /* MSVC strictly requires this include [off_t] */

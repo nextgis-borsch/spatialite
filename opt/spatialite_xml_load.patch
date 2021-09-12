@@ -1,0 +1,79 @@
+diff --git a/src/spatialite_xml_load/spatialite_xml_load.c b/src/spatialite_xml_load/spatialite_xml_load.c
+index d402be2..1ad06e2 100644
+--- a/src/spatialite_xml_load/spatialite_xml_load.c
++++ b/src/spatialite_xml_load/spatialite_xml_load.c
+@@ -33,7 +33,11 @@ Regione Toscana - Settore Sistema Informativo Territoriale ed Ambientale
+ 
+ */
+ 
++#if defined(_WIN32) && !defined(__MINGW32__)
++#include <Winsock2.h>
++#else
+ #include <sys/time.h>
++#endif
+ 
+ #if defined(_WIN32) && !defined(__MINGW32__)
+ /* MSVC strictly requires this include [off_t] */
+@@ -43,7 +47,6 @@ Regione Toscana - Settore Sistema Informativo Territoriale ed Ambientale
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+-#include <libgen.h>
+ 
+ #include <expat.h>
+ 
+@@ -69,6 +72,54 @@ Regione Toscana - Settore Sistema Informativo Territoriale ed Ambientale
+ #define ARG_PARENT_LEVELS	4
+ #define ARG_CACHE_SIZE 5
+ 
++#if defined(_WIN32) && !defined(__MINGW32__)
++
++#define strcasecmp _stricmp
++
++// https://git.postgresql.org/gitweb/?p=postgresql.git;a=blob;f=src/port/gettimeofday.c;h=75a91993b74414c0a1c13a2a09ce739cb8aa8a08;hb=HEAD
++
++/* FILETIME of Jan 1 1970 00:00:00. */
++static const unsigned __int64 epoch = 116444736000000000;
++
++/*
++* timezone information is stored outside the kernel so tzp isn't used anymore.
++*
++* Note: this function is not for Win32 high precision timing purpose. See
++* elapsed_time().
++*/
++
++int gettimeofday(struct timeval * tp, struct timezone * tzp)
++{
++    FILETIME    file_time;
++    SYSTEMTIME  system_time;
++    ULARGE_INTEGER ularge;
++
++    GetSystemTime(&system_time);
++    SystemTimeToFileTime(&system_time, &file_time);
++    ularge.LowPart = file_time.dwLowDateTime;
++    ularge.HighPart = file_time.dwHighDateTime;
++
++    tp->tv_sec = (long) ((ularge.QuadPart - epoch) / 10000000L);
++    tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
++
++    return 0;
++}
++
++char * basename(char * path)
++{
++    int i;
++
++    if(path == NULL || path[0] == '\0')
++        return "";
++    for(i = strlen(path) - 1; i >= 0 && path[i] == '/'; i--);
++    if(i == -1)
++        return "/";
++    for(path[i+1] = '\0'; i >= 0 && path[i] != '/'; i--);
++    return &path[i+1];
++}
++
++#endif
++
+ struct gmlDynBuffer
+ {
+ /* a struct handling a dynamically growing output buffer */
