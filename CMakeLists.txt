@@ -76,11 +76,11 @@ report_version(${PROJECT_NAME} ${VERSION})
 
 include(FindAnyProject)
 
-find_anyproject(Spatialite REQUIRED)
+find_anyproject(SPATIALITE REQUIRED)
 find_anyproject(SQLite3 REQUIRED)
-find_anyproject(Iconv REQUIRED)
-find_anyproject(Expat REQUIRED)
-find_anyproject(LibXml2 REQUIRED)
+find_anyproject(ICONV REQUIRED)
+find_anyproject(EXPAT REQUIRED)
+find_anyproject(LIBXML2 REQUIRED)
 
 if(WIN32)
     configure_file(${CMAKE_SOURCE_DIR}/cmake/config.h.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/config-msvc.h IMMEDIATE @ONLY)
